@@ -1,11 +1,37 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+// 1. さっき作った microcms.ts から client を持ってくる
+import { client } from '../lib/microcms';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// 2. microCMSから「blogs（APIのエンドポイント名）」のデータを取得する
+const response = await client.get({
+  endpoint: 'blogs', // ここはmicroCMSで作ったAPIのエンドポイント名に合わせてください
+});
+
+// 3. 取得した記事のリストを定数に入れる
+const blogs = response.contents;
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <title>マイカンパニー ホームページ</title>
+  </head>
+  <body style="font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px;">
+    <h1>自社ホームページへようこそ！</h1>
+    <p>microCMSと連携したブログ記事一覧です。</p>
+
+    <hr style="margin: 20px 0;" />
+
+    <h2>お知らせ・ブログ一覧</h2>
+    
+    <ul>
+      {blogs.map((blog: any) => (
+        <li style="margin-bottom: 16px;">
+          <strong>{blog.title}</strong>
+          <!-- ※リッチエディタを使っている場合は set:html を使います -->
+          <div set:html={blog.content} style="margin-top: 4px; color: #555;" />
+        </li>
+      ))}
+    </ul>
+  </body>
+</html>
